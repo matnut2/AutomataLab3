@@ -10,7 +10,7 @@ Solo uno dei componenti del gruppo consegna gli esercizi, indicando i nomi dei c
 Per consegnare questa prima esercitazione è sufficiente allegare il file runtimeVisitor.cpp con l'implementazione dell'interprete nello spazio sottostante. Consegna solo questo file e niente altro.
 Gli esercizi vanno consegnati entro le ore 23:55 di venerdì 11 Giugno. La consegna in ritardo non dà alcun bonus.
 
-#Laboratorio 3 - Interprete
+# Laboratorio 3 - Interprete
 In questo laboratorio vi si chiede di completare l'implementazione dell'interprete per il linguaggio Pascal. Il file lab03.zip contiene la grammatica completa del Pascal, il codice del syntax checker del laboratorio 2, lo schema di implementazione dell'interprete descritto nel tutorial ed il Makefile per la compilazione. 
 
 Nel documento laboratorio_03.pdf potete trovare un tutorial che descrive il codice dell'interprete e dà le istruzioni per la compilazione ed esecuzione in ambiente Linux. Le parti che devono essere implementate sono contrassegnate con TODO nei file runtimeVisitor.cpp.

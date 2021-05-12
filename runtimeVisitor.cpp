@@ -11,7 +11,7 @@ antlrcpp::Any runtimeVisitor::visitId_list(pascalParser::Id_listContext *ctx) {
     // Resto della lista
     pascalParser::Id_listContext *tail = ctx->id_list();
     // controllo che la variabile non sia già stata dichiarata
-    if(this->vars.find(varname) != this->vars.end()) {
+    if(this->vars.find(varname) != tclehis->vars.end()) {
         cerr << "Error: Duplicate variable declaration '" << varname << "'" << endl;
         exit(EXIT_FAILURE);
     }
@@ -40,14 +40,23 @@ antlrcpp::Any runtimeVisitor::visitOut(pascalParser::OutContext *ctx) {
         // caso stampa intero
         int value = visitExpr(ctx->expr());
         cout << value << endl;
+    } else {
+        string s = ctx->STRING()->getText();
+        cout << s.substr(1, s.length()-2) << endl;
     }
-    // TODO: implementare il caso stampa di una stringa 
+    // DONE: implementare il caso stampa di una stringa 
     return NULL;
 }
 
 antlrcpp::Any runtimeVisitor::visitIn(pascalParser::InContext *ctx) {
-    // TODO: implementa la lettura dell'input da tastiera
+    // DONE: implementa la lettura dell'input da tastiera
     // il metodo deve aggiornare il valore della variabile
+    string varname = ctx->ID()->getText();
+    if(this->vars.find(varname) == this->vars.end()) {
+        cerr << "Error: Undefined variable '" << varname << "'" << endl;
+        exit(EXIT_FAILURE);
+    }
+    cin >> vars[varname];
     return NULL;
 }
 
@@ -58,13 +67,20 @@ antlrcpp::Any runtimeVisitor::visitBranch(pascalParser::BranchContext *ctx) {
     if(guard) {
         // se guardia vera, esegue ramo then
         visitCode_block(ctx->code_block(0));
-    } 
-    // TODO: implementa l'esecuzione del ramo else (se presente) quando la guardia è falsa 
+    } else {
+        if(ctx->code_block().size() == 2) {
+            visitCode_block(ctx->code_block(1));
+        }
+    }
+    // DONE: implementa l'esecuzione del ramo else (se presente) quando la guardia è falsa 
     return NULL;
 }
 
 antlrcpp::Any runtimeVisitor::visitLoop(pascalParser::LoopContext *ctx) {
-    // TODO: implementa l'esecuzione del ciclo repeat-until
+    // DONE: implementa l'esecuzione del ciclo repeat-until
+    do {
+        visitSt_list(ctx->st_list());
+    } while(!visitGuard(ctx->guard()));
     return NULL;
 }
 
@@ -131,14 +147,37 @@ antlrcpp::Any runtimeVisitor::visitExpr(pascalParser::ExprContext *ctx) {
 }
 
 antlrcpp::Any runtimeVisitor::visitGuard(pascalParser::GuardContext *ctx) {
-    // TODO: implementa la valutazione di una espressione booleana
+    // DONE: implementa la valutazione di una espressione booleana
     // il metodo ritorna true se l'espressione è vera, false altrimenti
-    return true; 
+    if(ctx->NOT() != NULL) {
+        return !visitGuard(ctx->guard(0));
+    } else if(ctx->AND() != NULL) {
+        return visitGuard(ctx->guard(0)) && visitGuard(ctx->guard(1));
+    } else if (ctx->OR() != NULL) {
+        return visitGuard(ctx->guard(0)) || visitGuard(ctx->guard(1));
+    } else if(ctx->guard().size() == 1) {
+        return visitGuard(ctx->guard(0));
+    } else {
+        return visitRelation(ctx->relation());
+    }
 }
 
 antlrcpp::Any runtimeVisitor::visitRelation(pascalParser::RelationContext *ctx) {
-    // TODO: implementa la valutazione di un confronto 
+    // DONE: implementa la valutazione di un confronto 
     // il metodo ritorna true se il confronto è vero, false altrimenti
-    return true;
+    if(ctx->EQ() != NULL) {
+        return static_cast<int>(visitExpr(ctx->expr(0))) == static_cast<int>(visitExpr(ctx->expr(1)));
+    } else if(ctx->LT() != NULL) {
+        return static_cast<int>(visitExpr(ctx->expr(0))) < static_cast<int>(visitExpr(ctx->expr(1)));
+    } else if(ctx->LEQ() != NULL) {
+        return static_cast<int>(visitExpr(ctx->expr(0))) <= static_cast<int>(visitExpr(ctx->expr(1)));
+    } else if(ctx->GT() != NULL) {
+        return static_cast<int>(visitExpr(ctx->expr(0))) > static_cast<int>(visitExpr(ctx->expr(1)));
+    } else if(ctx->GEQ() != NULL) {
+        return static_cast<int>(visitExpr(ctx->expr(0))) >= static_cast<int>(visitExpr(ctx->expr(1)));
+    } else if (ctx->NEQ() != NULL) {
+        return static_cast<int>(visitExpr(ctx->expr(0))) != static_cast<int>(visitExpr(ctx->expr(1)));
+    }
+    // next line is just to avoid warning
+    return false;
 }
-
